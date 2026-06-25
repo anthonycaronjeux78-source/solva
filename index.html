@@ -4,181 +4,227 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solva — Dites le problème. On livre la solution.</title>
-<meta name="description" content="Solva analyse le problème de votre entreprise et conçoit la solution pour le résoudre. Vite, à périmètre et prix clairs. Réponse sous 48h, uniquement si on peut aider.">
+<meta name="description" content="Solva analyse le problème de votre entreprise et conçoit la solution pour le résoudre. Vite, à périmètre et prix clairs. Réponse sous 24h, uniquement si on peut aider.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0B0C10; --ink-2:#0E0F14; --surface:#111319;
-    --bone:#F5F3EC; --muted:#9A988F; --muted-2:#6E6C66;
-    --line:#20222A; --line-2:#2A2C34;
-    --green:#34D17F; --green-dim:#1FA866;
-    --maxw:1080px;
-    --font-display:'Space Grotesk', sans-serif;
-    --font-body:'Inter', sans-serif;
-    --font-mono:'JetBrains Mono', monospace;
+    --ink:#0A0B0E; --ink-2:#0E0F14; --surface:#111319;
+    --bone:#F5F3EC; --muted:#9A988F; --muted-2:#6B6963;
+    --line:#1E2027; --line-2:#2A2C34;
+    --green:#34D17F; --green-soft:#7DF3B6;
+    --maxw:1120px;
+    --fd:'Space Grotesk', sans-serif;
+    --fb:'Inter', sans-serif;
+    --fm:'JetBrains Mono', monospace;
+    --ease:cubic-bezier(.2,.7,.2,1);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
     background-color:var(--ink);
-    background-image:radial-gradient(circle, rgba(245,243,236,0.035) 1px, transparent 1.4px);
-    background-size:26px 26px;
-    color:var(--bone);
-    font-family:var(--font-body);
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
+    background-image:radial-gradient(circle, rgba(245,243,236,0.06) 1px, transparent 1.5px);
+    background-size:22px 22px;
+    color:var(--bone);font-family:var(--fb);line-height:1.6;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
   }
   ::selection{background:rgba(52,209,127,0.25)}
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
-  .eyebrow{
-    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:9px;
-  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+  #bgcanvas{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+
+  .eyebrow{font-family:var(--fm);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:9px}
   .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(52,209,127,0.14)}
+
+  [data-anim]{opacity:0;transform:translateY(18px);transition:opacity .9s var(--ease), transform .9s var(--ease)}
+  body.ready [data-anim]{opacity:1;transform:none}
+  .lineclip{overflow:hidden;display:block}
+  .lineclip > span{display:block;transform:translateY(112%);transition:transform 1s var(--ease)}
+  body.ready .lineclip > span{transform:none}
 
   /* NAV */
   .nav{position:sticky;top:0;z-index:50;border-bottom:1px solid transparent;transition:border-color .3s, background .3s, backdrop-filter .3s}
-  .nav.scrolled{border-bottom-color:var(--line);background:rgba(11,12,16,0.72);backdrop-filter:blur(10px)}
-  .nav-inner{max-width:var(--maxw);margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
-  .brand{font-family:var(--font-display);font-weight:500;font-size:1.45rem;letter-spacing:-.04em;color:var(--bone)}
+  .nav.scrolled{border-bottom-color:var(--line);background:rgba(10,11,14,0.72);backdrop-filter:blur(12px)}
+  .nav-inner{max-width:var(--maxw);margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .nav-left{display:flex;align-items:center;gap:18px}
+  .brand{font-family:var(--fd);font-weight:500;font-size:1.45rem;letter-spacing:-.04em;color:var(--bone)}
   .brand span{color:var(--green)}
-  .nav-cta{font-size:.9rem;color:var(--bone);border:1px solid var(--line-2);padding:9px 16px;border-radius:8px;transition:border-color .2s,background .2s}
-  .nav-cta:hover{border-color:var(--green);background:rgba(52,209,127,0.06)}
+  .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.7rem;color:var(--muted);letter-spacing:.04em}
+  .status .d{width:8px;height:8px;border-radius:50%;background:var(--green);animation:beacon 2.6s infinite}
+  @keyframes beacon{0%{box-shadow:0 0 0 0 rgba(52,209,127,.5)}70%,100%{box-shadow:0 0 0 9px rgba(52,209,127,0)}}
+  .nav-cta{font-size:.9rem;color:var(--bone);border:1px solid var(--line-2);padding:9px 16px;border-radius:8px;transition:border-color .2s,background .2s,transform .2s}
+  .nav-cta:hover{border-color:var(--green);background:rgba(52,209,127,0.06);transform:translateY(-1px)}
 
   /* HERO */
-  .hero{padding:84px 0 96px}
-  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
-  .hero h1{
-    font-family:var(--font-display);font-weight:500;
-    font-size:clamp(2.5rem,5.6vw,4.3rem);line-height:1.02;letter-spacing:-.035em;
-    margin:22px 0 0;color:var(--bone);
-  }
-  .hero h1 .res{color:var(--muted-2);position:relative}
-  .hero h1 .res b{color:var(--bone);font-weight:500}
-  .hero p.lead{margin:24px 0 0;color:var(--muted);font-size:1.075rem;max-width:33em}
+  .hero{padding:90px 0 70px}
+  .hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:56px;align-items:center}
+  .hero h1{font-family:var(--fd);font-weight:500;font-size:clamp(2.5rem,5.4vw,4.2rem);line-height:1.04;letter-spacing:-.035em;margin:22px 0 0;color:var(--bone)}
+  .hero p.lead{margin:26px 0 0;color:var(--muted);font-size:1.08rem;max-width:33em}
   .hero p.lead b{color:var(--bone);font-weight:500}
   .cta-row{margin-top:34px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-  .btn{
-    font-family:var(--font-body);font-weight:500;font-size:1rem;
-    background:var(--green);color:#08130C;border:none;cursor:pointer;
-    padding:14px 24px;border-radius:10px;display:inline-flex;align-items:center;gap:10px;
-    transition:transform .15s ease, box-shadow .2s ease, background .2s;
-  }
-  .btn:hover{background:#46DE8D;transform:translateY(-1px);box-shadow:0 8px 30px rgba(52,209,127,0.18)}
-  .btn:active{transform:translateY(0)}
+  .btn{font-family:var(--fb);font-weight:500;font-size:1rem;background:var(--green);color:#06120B;border:none;cursor:pointer;padding:14px 26px;border-radius:10px;display:inline-flex;align-items:center;gap:10px;transition:transform .18s var(--ease), box-shadow .25s, background .2s;position:relative;overflow:hidden}
+  .btn::after{content:"";position:absolute;top:0;left:-130%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);transition:left .6s var(--ease)}
+  .btn:hover{background:#46DE8D;transform:translateY(-2px);box-shadow:0 12px 36px rgba(52,209,127,0.22)}
+  .btn:hover::after{left:140%}
   .btn .arr{transition:transform .2s}
-  .btn:hover .arr{transform:translateX(3px)}
-  .cta-note{font-family:var(--font-mono);font-size:.74rem;color:var(--muted-2);letter-spacing:.04em}
+  .btn:hover .arr{transform:translateX(4px)}
+  .cta-note{font-family:var(--fm);font-size:.74rem;color:var(--muted-2);letter-spacing:.04em}
 
   /* HERO VISUAL */
-  .hero-visual{
-    position:relative;border:1px solid var(--line);border-radius:18px;
-    background-color:var(--ink-2);
-    background-image:radial-gradient(circle, rgba(245,243,236,0.045) 1px, transparent 1.4px);
-    background-size:24px 24px;
-    height:340px;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  }
+  .hero-visual{position:relative;border:1px solid var(--line);border-radius:18px;background-color:rgba(14,15,20,0.6);background-image:radial-gradient(circle, rgba(245,243,236,0.06) 1px, transparent 1.5px);background-size:22px 22px;height:340px;display:flex;align-items:center;justify-content:center;overflow:hidden;backdrop-filter:blur(2px)}
+  .hero-visual::after{content:"";position:absolute;inset:0;background:radial-gradient(170px circle at var(--mx,70%) var(--my,40%), rgba(52,209,127,0.12), transparent 70%);opacity:0;transition:opacity .5s;pointer-events:none}
+  .hero-visual:hover::after{opacity:1}
   .reso{display:flex;align-items:center;gap:16px;transform:translateX(-6px)}
-  .reso .d{width:6px;height:6px;border-radius:50%;background:#3A3C44;flex:none}
-  .reso .d:nth-child(1){opacity:.45}
-  .reso .d:nth-child(2){background:#54565E;width:6.5px;height:6.5px}
-  .reso .d:nth-child(3){background:#74767C;width:7px;height:7px}
-  .reso .d:nth-child(4){background:#9C9A94;width:7.5px;height:7.5px}
-  .reso .d:nth-child(5){background:#C9C8C0;width:8px;height:8px}
-  .reso .d:nth-child(6){background:var(--green);width:9px;height:9px}
-  .node{
-    position:relative;width:16px;height:16px;border-radius:50%;background:var(--green);flex:none;margin-left:6px;
-    box-shadow:0 0 0 7px rgba(52,209,127,0.10), 0 0 0 18px rgba(52,209,127,0.05), 0 0 0 34px rgba(52,209,127,0.025);
-  }
-  .node::before,.node::after{
-    content:"";position:absolute;inset:50%;width:16px;height:16px;margin:-8px;border-radius:50%;
-    border:1px solid rgba(52,209,127,0.55);animation:ping 3.4s cubic-bezier(.2,.6,.3,1) infinite;
-  }
-  .node::after{animation-delay:1.7s}
+  .reso .rd{width:6px;height:6px;border-radius:50%;background:#34363E;animation:wave 2.8s ease-in-out infinite;animation-delay:calc(var(--i)*0.18s)}
+  @keyframes wave{0%,100%{background:#34363E;transform:scale(1);box-shadow:none}16%{background:var(--green);transform:scale(1.6);box-shadow:0 0 10px rgba(52,209,127,.6)}38%{background:#34363E;transform:scale(1)}}
+  .reso .node{position:relative;width:15px;height:15px;border-radius:50%;background:var(--green);margin-left:6px;box-shadow:0 0 0 6px rgba(52,209,127,0.10),0 0 0 14px rgba(52,209,127,0.05),0 0 18px rgba(52,209,127,.4)}
+  .reso .node::before,.reso .node::after{content:"";position:absolute;inset:50%;width:15px;height:15px;margin:-7.5px;border-radius:50%;border:1px solid rgba(52,209,127,0.55);animation:ping 3.2s var(--ease) infinite}
+  .reso .node::after{animation-delay:1.6s}
   @keyframes ping{0%{transform:scale(1);opacity:.7}80%,100%{transform:scale(6.5);opacity:0}}
-  .visual-tag{position:absolute;left:18px;bottom:16px;font-family:var(--font-mono);font-size:.68rem;color:var(--muted-2);letter-spacing:.04em}
+  .visual-tag{position:absolute;left:18px;bottom:16px;font-family:var(--fm);font-size:.68rem;color:var(--muted-2);letter-spacing:.06em}
 
   /* STEPS */
-  .steps{padding:40px 0 96px}
-  .steps-head{display:flex;flex-direction:column;gap:14px;margin-bottom:48px;max-width:40em}
-  .steps-head h2{font-family:var(--font-display);font-weight:500;font-size:clamp(1.7rem,3.4vw,2.4rem);letter-spacing:-.02em}
+  .steps{padding:72px 0 80px}
+  .steps-head{display:flex;flex-direction:column;gap:14px;margin-bottom:46px;max-width:40em}
+  .steps-head h2{font-family:var(--fd);font-weight:500;font-size:clamp(1.7rem,3.4vw,2.4rem);letter-spacing:-.02em}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-  .step{background:var(--ink);padding:34px 30px;opacity:0;transform:translateY(14px);transition:opacity .6s ease, transform .6s ease}
+  .step{background:var(--ink);padding:34px 30px;opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease), transform .7s var(--ease), background .3s}
   .step.in{opacity:1;transform:none}
-  .step .num{font-family:var(--font-mono);font-size:.8rem;color:var(--green);letter-spacing:.1em}
-  .step h3{font-family:var(--font-display);font-weight:500;font-size:1.22rem;margin:16px 0 10px;letter-spacing:-.01em}
+  .step:hover{background:#0E0F14}
+  .step .num{font-family:var(--fm);font-size:.8rem;color:var(--green);letter-spacing:.1em}
+  .step h3{font-family:var(--fd);font-weight:500;font-size:1.22rem;margin:16px 0 10px;letter-spacing:-.01em}
   .step p{color:var(--muted);font-size:.96rem}
 
+  /* MISSION / VISION */
+  .mv{padding:60px 0}
+  .mv-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .mv-block{background:rgba(14,15,20,0.55);border:1px solid var(--line);border-radius:16px;padding:38px 34px;opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease), transform .7s var(--ease)}
+  .mv-block.in{opacity:1;transform:none}
+  .mv-block .eyebrow{margin-bottom:18px}
+  .mv-text{font-family:var(--fd);font-weight:500;font-size:1.42rem;line-height:1.42;letter-spacing:-.015em;color:var(--muted)}
+  .mv-text b{color:var(--bone);font-weight:500}
+
+  /* VALEURS */
+  .values{padding:60px 0 90px}
+  .vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .vcard{background:rgba(17,19,25,0.6);border:1px solid var(--line);border-radius:16px;padding:28px 24px;opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease), transform .7s var(--ease), border-color .3s, background .3s}
+  .vcard.in{opacity:1;transform:none}
+  .vcard:hover{border-color:var(--line-2);background:rgba(20,22,28,0.7)}
+  .vcard h3{font-family:var(--fd);font-weight:500;font-size:1.16rem;margin:20px 0 8px;letter-spacing:-.01em}
+  .vcard p{color:var(--muted);font-size:.92rem}
+  .vicon{position:relative;width:44px;height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--ink-2);overflow:hidden}
+  .vicon .c{position:absolute;border-radius:50%}
+  /* clarté : anneau qui se resserre */
+  .vicon.clarte .core{width:8px;height:8px;background:var(--green);top:50%;left:50%;margin:-4px;box-shadow:0 0 8px rgba(52,209,127,.6)}
+  .vicon.clarte .ring{width:8px;height:8px;border:1px solid rgba(52,209,127,.7);top:50%;left:50%;margin:-4px;animation:contract 2.6s var(--ease) infinite}
+  @keyframes contract{0%{transform:scale(2.6);opacity:0}45%{opacity:.7}100%{transform:scale(1);opacity:0}}
+  /* vitesse : point qui file */
+  .vicon.vitesse .track{position:absolute;top:50%;left:8px;right:8px;height:1px;background:var(--line-2);transform:translateY(-.5px)}
+  .vicon.vitesse .dash{width:7px;height:7px;background:var(--green);top:50%;margin-top:-3.5px;box-shadow:0 0 8px rgba(52,209,127,.7);animation:dash 1.7s var(--ease) infinite}
+  @keyframes dash{0%{left:7px;opacity:0}18%{opacity:1}100%{left:30px;opacity:0}}
+  /* honnêteté : ligne droite qui se trace */
+  .vicon.honnete .seed{width:6px;height:6px;background:var(--muted);top:50%;left:9px;margin-top:-3px}
+  .vicon.honnete .line{position:absolute;top:50%;left:12px;height:2px;background:var(--green);transform-origin:left;transform:scaleX(0);margin-top:-1px;width:20px;animation:grow 2.4s var(--ease) infinite}
+  .vicon.honnete .tip{width:7px;height:7px;background:var(--green);top:50%;left:30px;margin-top:-3.5px;opacity:0;box-shadow:0 0 8px rgba(52,209,127,.7);animation:tip 2.4s var(--ease) infinite}
+  @keyframes grow{0%{transform:scaleX(0)}55%{transform:scaleX(1)}100%{transform:scaleX(1);opacity:.4}}
+  @keyframes tip{0%,45%{opacity:0}60%{opacity:1}100%{opacity:.4}}
+  /* exécution : graine qui atteint le noeud */
+  .vicon.exec .seed{width:6px;height:6px;background:#555;top:50%;left:8px;margin-top:-3px;animation:seed 2.6s var(--ease) infinite}
+  .vicon.exec .target{width:9px;height:9px;border:1px solid rgba(52,209,127,.7);top:50%;left:28px;margin-top:-4.5px;animation:targetPulse 2.6s var(--ease) infinite}
+  @keyframes seed{0%{left:8px;background:#555}65%{left:28px;background:var(--green)}100%{left:28px;background:var(--green);opacity:0}}
+  @keyframes targetPulse{0%,55%{transform:scale(1);box-shadow:none}70%{transform:scale(1.5);box-shadow:0 0 12px rgba(52,209,127,.6);background:rgba(52,209,127,.15)}100%{transform:scale(1)}}
+
   /* FORM */
-  .form-section{padding:24px 0 110px}
-  .form-card{
-    max-width:660px;margin:0 auto;background:var(--surface);
-    border:1px solid var(--line);border-radius:18px;padding:40px 38px;position:relative;
-  }
+  .form-section{padding:20px 0 110px}
+  .form-card{max-width:660px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:42px 40px;position:relative;overflow:hidden}
+  .form-card::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle, rgba(245,243,236,0.04) 1px, transparent 1.5px);background-size:20px 20px;pointer-events:none}
+  .form-inner{position:relative;transition:opacity .35s var(--ease), transform .35s var(--ease)}
+  .form-inner.leaving{opacity:0;transform:scale(.985)}
   .form-card .eyebrow{margin-bottom:16px}
-  .form-card h2{font-family:var(--font-display);font-weight:500;font-size:clamp(1.6rem,3.2vw,2.05rem);letter-spacing:-.02em}
+  .form-card h2{font-family:var(--fd);font-weight:500;font-size:clamp(1.6rem,3.2vw,2.05rem);letter-spacing:-.02em}
   .form-card .sub{color:var(--muted);margin-top:12px;font-size:1rem}
   form{margin-top:30px;display:flex;flex-direction:column;gap:18px}
   .field{display:flex;flex-direction:column;gap:8px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   label{font-size:.85rem;color:var(--bone);font-weight:500}
   label .opt{color:var(--muted-2);font-weight:400}
-  input,textarea{
-    font-family:var(--font-body);font-size:.98rem;color:var(--bone);
-    background:var(--ink-2);border:1px solid var(--line-2);border-radius:10px;padding:13px 15px;
-    transition:border-color .18s, box-shadow .18s;width:100%;resize:vertical;
-  }
-  input::placeholder,textarea::placeholder{color:#5C5A54}
+  input,textarea{font-family:var(--fb);font-size:.98rem;color:var(--bone);background:var(--ink-2);border:1px solid var(--line-2);border-radius:10px;padding:13px 15px;transition:border-color .18s, box-shadow .18s;width:100%;resize:vertical}
+  input::placeholder,textarea::placeholder{color:#56544E}
   input:focus,textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(52,209,127,0.16)}
   textarea{min-height:128px;line-height:1.55}
-  .form-card .btn{margin-top:6px;justify-content:center}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
+  .form-inner .btn{margin-top:6px;justify-content:center;width:100%}
   .consent{font-size:.78rem;color:var(--muted-2);margin-top:2px;line-height:1.5}
 
   /* CONFIRMATION */
-  .confirm{display:none;flex-direction:column;align-items:center;text-align:center;padding:24px 6px 8px}
+  .confirm{display:none;flex-direction:column;align-items:center;text-align:center;padding:26px 6px 10px;position:relative}
   .confirm.show{display:flex}
-  .confirm .node{margin:6px 0 26px;transform:scale(1.15)}
-  .confirm h2{font-family:var(--font-display);font-weight:500;font-size:1.9rem;letter-spacing:-.02em}
+  .sequence{display:flex;align-items:center;justify-content:center;gap:18px;margin:14px 0 34px}
+  .seq-dot{width:9px;height:9px;border-radius:50%;background:#24262D;transform:scale(.5);opacity:.4}
+  .seq-node{position:relative;width:18px;height:18px;border-radius:50%;background:#24262D;margin-left:6px;transform:scale(.3);opacity:0}
+  .seq-node .ring{position:absolute;inset:50%;width:18px;height:18px;margin:-9px;border-radius:50%;border:1px solid rgba(52,209,127,0.6);opacity:0}
+  .confirm.run .seq-dot{animation:ignite .5s var(--ease) forwards;animation-delay:calc(var(--i)*0.13s)}
+  .confirm.run .seq-node{animation:bloom .6s var(--ease) forwards;animation-delay:1.15s}
+  .confirm.run .seq-node .ring{animation:rpulse 1.9s ease-out infinite;animation-delay:1.35s}
+  .confirm.run .seq-node .ring:nth-child(2){animation-delay:1.95s}
+  .confirm.run .seq-node .ring:nth-child(3){animation-delay:2.55s}
+  @keyframes ignite{0%{background:#24262D;transform:scale(.5);opacity:.4;box-shadow:none}55%{background:var(--green-soft);transform:scale(1.7);opacity:1;box-shadow:0 0 16px rgba(52,209,127,.75)}100%{background:var(--green);transform:scale(1);opacity:1;box-shadow:0 0 0 4px rgba(52,209,127,.12)}}
+  @keyframes bloom{0%{background:#24262D;transform:scale(.3);opacity:0;box-shadow:none}60%{background:var(--green);transform:scale(1.35);opacity:1;box-shadow:0 0 0 9px rgba(52,209,127,.16),0 0 28px rgba(52,209,127,.55)}100%{background:var(--green);transform:scale(1);opacity:1;box-shadow:0 0 0 7px rgba(52,209,127,.10),0 0 0 16px rgba(52,209,127,.05)}}
+  @keyframes rpulse{0%{transform:scale(1);opacity:.7}80%,100%{transform:scale(6);opacity:0}}
+  .confirm-copy{opacity:0;transform:translateY(12px);transition:opacity .7s var(--ease), transform .7s var(--ease);transition-delay:1.55s}
+  .confirm.run .confirm-copy{opacity:1;transform:none}
+  .confirm h2{font-family:var(--fd);font-weight:500;font-size:1.95rem;letter-spacing:-.02em}
   .confirm p{color:var(--muted);margin-top:14px;max-width:34em;font-size:1rem}
   .confirm p b{color:var(--bone);font-weight:500}
-  .ref{font-family:var(--font-mono);font-size:.78rem;color:var(--muted-2);margin-top:22px;letter-spacing:.06em;border:1px solid var(--line-2);padding:8px 14px;border-radius:8px}
-  .again{margin-top:24px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line-2);padding-bottom:2px;cursor:pointer;transition:color .2s,border-color .2s}
+  .ref{font-family:var(--fm);font-size:.78rem;color:var(--muted-2);margin-top:22px;letter-spacing:.06em;border:1px solid var(--line-2);padding:8px 14px;border-radius:8px;display:inline-block}
+  .again{margin-top:22px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line-2);padding-bottom:2px;cursor:pointer;transition:color .2s,border-color .2s}
   .again:hover{color:var(--bone);border-color:var(--green)}
 
   /* FOOTER */
-  footer{border-top:1px solid var(--line);padding:40px 0}
-  .foot-inner{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-  .foot-brand{font-family:var(--font-display);font-weight:500;font-size:1.3rem;letter-spacing:-.04em}
+  footer{border-top:1px solid var(--line);padding:42px 0;background:rgba(10,11,14,0.6)}
+  .foot-inner{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:1}
+  .foot-brand{font-family:var(--fd);font-weight:500;font-size:1.3rem;letter-spacing:-.04em}
   .foot-brand span{color:var(--green)}
   .foot-tag{color:var(--muted);font-size:.92rem}
-  .foot-meta{font-family:var(--font-mono);font-size:.72rem;color:var(--muted-2);letter-spacing:.04em;text-align:right}
+  .foot-meta{font-family:var(--fm);font-size:.72rem;color:var(--muted-2);letter-spacing:.04em;text-align:right}
   .foot-meta a:hover{color:var(--bone)}
 
   @media (max-width:860px){
-    .hero-grid{grid-template-columns:1fr;gap:40px}
-    .hero-visual{height:260px;order:2}
-    .hero{padding:60px 0 72px}
+    .hero-grid{grid-template-columns:1fr;gap:38px}
+    .hero-visual{height:240px;order:2}
+    .hero{padding:54px 0 56px}
     .grid3{grid-template-columns:1fr}
+    .mv-grid{grid-template-columns:1fr;gap:18px}
+    .vgrid{grid-template-columns:1fr 1fr;gap:14px}
     .row2{grid-template-columns:1fr}
-    .form-card{padding:32px 24px}
+    .form-card{padding:32px 22px}
+    .status{display:none}
     .foot-meta{text-align:left}
   }
+  @media (max-width:520px){ .vgrid{grid-template-columns:1fr} }
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
-    *,*::before,*::after{animation:none!important;transition:none!important}
-    .step{opacity:1;transform:none}
+    *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+    [data-anim],.step,.mv-block,.vcard{opacity:1!important;transform:none!important}
+    .lineclip > span{transform:none!important}
+    .confirm-copy{opacity:1!important;transform:none!important}
+    .seq-dot{background:var(--green);opacity:1;transform:none}
+    .seq-node{background:var(--green);opacity:1;transform:none}
   }
 </style>
 </head>
 <body>
 
+<canvas id="bgcanvas" aria-hidden="true"></canvas>
+
 <nav class="nav" id="nav">
   <div class="nav-inner">
-    <a href="#top" class="brand">solva<span>.</span></a>
+    <div class="nav-left">
+      <a href="#top" class="brand">solva<span>.</span></a>
+      <span class="status"><span class="d"></span>Disponible · réponse sous 24 h</span>
+    </div>
     <a href="#exposer" class="nav-cta">Exposer un problème</a>
   </div>
 </nav>
@@ -187,18 +233,20 @@
   <div class="wrap">
     <div class="hero-grid">
       <div>
-        <span class="eyebrow">Studio de solutions augmenté par l'IA</span>
-        <h1>Dites-nous votre problème.<br><span class="res"><b>On vous livre la solution.</b></span></h1>
-        <p class="lead">Solva analyse le problème de votre entreprise et conçoit la solution la plus efficace pour le résoudre — <b>vite, à périmètre et prix clairs</b>. On ne revient vers vous que si on peut vraiment aider.</p>
-        <div class="cta-row">
+        <span class="eyebrow" data-anim style="transition-delay:.05s">Studio de solutions augmenté par l'IA</span>
+        <h1>
+          <span class="lineclip"><span style="transition-delay:.12s">Dites-nous votre problème.</span></span>
+          <span class="lineclip"><span style="transition-delay:.24s">On vous livre la solution.</span></span>
+        </h1>
+        <p class="lead" data-anim style="transition-delay:.42s">Solva analyse le problème de votre entreprise et conçoit la solution la plus efficace pour le résoudre — <b>vite, à périmètre et prix clairs</b>. On ne revient vers vous que si on peut vraiment aider.</p>
+        <div class="cta-row" data-anim style="transition-delay:.56s">
           <a href="#exposer" class="btn">Exposez votre problème <span class="arr">→</span></a>
-          <span class="cta-note">Réponse sous 48 h · sans engagement</span>
+          <span class="cta-note">Réponse sous 24 h · sans engagement</span>
         </div>
       </div>
-      <div class="hero-visual" aria-hidden="true">
+      <div class="hero-visual" data-anim style="transition-delay:.5s" aria-hidden="true">
         <div class="reso">
-          <span class="d"></span><span class="d"></span><span class="d"></span>
-          <span class="d"></span><span class="d"></span><span class="d"></span>
+          <span class="rd" style="--i:0"></span><span class="rd" style="--i:1"></span><span class="rd" style="--i:2"></span><span class="rd" style="--i:3"></span><span class="rd" style="--i:4"></span><span class="rd" style="--i:5"></span><span class="rd" style="--i:6"></span>
           <span class="node"></span>
         </div>
         <span class="visual-tag">problème → solution</span>
@@ -207,6 +255,7 @@
   </div>
 </header>
 
+
 <section class="steps">
   <div class="wrap">
     <div class="steps-head">
@@ -214,20 +263,48 @@
       <h2>Trois étapes, zéro friction.</h2>
     </div>
     <div class="grid3">
-      <div class="step">
-        <span class="num">01</span>
-        <h3>Vous exposez</h3>
-        <p>Décrivez votre problème en deux minutes, dans vos mots. Pas de jargon, pas de formulaire à rallonge.</p>
+      <div class="step" data-reveal><span class="num">01</span><h3>Vous exposez</h3><p>Décrivez votre problème en deux minutes, dans vos mots. Pas de jargon, pas de formulaire à rallonge.</p></div>
+      <div class="step" data-reveal><span class="num">02</span><h3>On analyse &amp; on conçoit</h3><p>On étudie votre cas et on conçoit la meilleure solution. On vous répond uniquement si on peut la résoudre.</p></div>
+      <div class="step" data-reveal><span class="num">03</span><h3>Vous recevez la solution</h3><p>Un plan clair, un coût, un délai. Vous décidez, on construit. Pas de blabla, pas de devis à rallonge.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="mv">
+  <div class="wrap mv-grid">
+    <div class="mv-block" data-reveal>
+      <span class="eyebrow">Mission</span>
+      <p class="mv-text">Rendre la résolution de problèmes de niveau expert accessible à <b>n'importe quelle entreprise</b>, en associant ingénieur humain et IA.</p>
+    </div>
+    <div class="mv-block" data-reveal>
+      <span class="eyebrow">Vision</span>
+      <p class="mv-text">Un monde où résoudre son problème le plus dur est <b>aussi simple qu'envoyer un mail</b>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="values">
+  <div class="wrap">
+    <div class="steps-head">
+      <span class="eyebrow">Nos valeurs</span>
+      <h2>Ce qui nous tient.</h2>
+    </div>
+    <div class="vgrid">
+      <div class="vcard" data-reveal>
+        <div class="vicon clarte"><span class="c core"></span><span class="c ring"></span></div>
+        <h3>Clarté</h3><p>On transforme une douleur floue en périmètre précis.</p>
       </div>
-      <div class="step">
-        <span class="num">02</span>
-        <h3>On analyse &amp; on conçoit</h3>
-        <p>On étudie votre cas et on conçoit la meilleure solution. On vous répond uniquement si on peut la résoudre.</p>
+      <div class="vcard" data-reveal>
+        <div class="vicon vitesse"><span class="track"></span><span class="c dash"></span></div>
+        <h3>Vitesse</h3><p>Augmentés par l'IA, on avance en jours, pas en mois.</p>
       </div>
-      <div class="step">
-        <span class="num">03</span>
-        <h3>Vous recevez la solution</h3>
-        <p>Un plan clair, un coût, un délai. Vous décidez, on construit. Pas de blabla, pas de devis à rallonge.</p>
+      <div class="vcard" data-reveal>
+        <div class="vicon honnete"><span class="c seed"></span><span class="line"></span><span class="c tip"></span></div>
+        <h3>Honnêteté</h3><p>On vous dit franchement si on ne peut pas aider. Pas de vente forcée.</p>
+      </div>
+      <div class="vcard" data-reveal>
+        <div class="vicon exec"><span class="c seed"></span><span class="c target"></span></div>
+        <h3>Exécution</h3><p>On livre, on ne fait pas que conseiller.</p>
       </div>
     </div>
   </div>
@@ -236,40 +313,34 @@
 <section class="form-section" id="exposer">
   <div class="wrap">
     <div class="form-card">
-      <div id="formView">
+      <div class="form-inner" id="formInner">
         <span class="eyebrow">Exposez votre problème</span>
         <h2>Dites-nous tout.</h2>
-        <p class="sub">Remplissez ça et on revient vers vous sous 48 h — uniquement si on peut le résoudre.</p>
+        <p class="sub">Remplissez ça et on revient vers vous sous 24 h — uniquement si on peut le résoudre.</p>
         <form id="problemForm" autocomplete="on">
           <div class="row2">
-            <div class="field">
-              <label for="company">Entreprise</label>
-              <input id="company" name="company" type="text" placeholder="Nom de votre entreprise" required>
-            </div>
-            <div class="field">
-              <label for="email">Email professionnel</label>
-              <input id="email" name="email" type="email" placeholder="vous@entreprise.com" required>
-            </div>
+            <div class="field"><label for="company">Entreprise</label><input id="company" name="company" type="text" placeholder="Nom de votre entreprise" required></div>
+            <div class="field"><label for="email">Email professionnel</label><input id="email" name="email" type="email" placeholder="vous@entreprise.com" required></div>
           </div>
-          <div class="field">
-            <label for="sector">Secteur <span class="opt">(facultatif)</span></label>
-            <input id="sector" name="sector" type="text" placeholder="Ex. logistique, e-commerce, industrie…">
-          </div>
-          <div class="field">
-            <label for="problem">Votre problème</label>
-            <textarea id="problem" name="problem" placeholder="Décrivez le problème que vous voulez résoudre — le contexte, ce qui bloque, ce que vous avez déjà essayé." required></textarea>
-          </div>
+          <div class="field"><label for="sector">Secteur <span class="opt">(facultatif)</span></label><input id="sector" name="sector" type="text" placeholder="Ex. logistique, e-commerce, industrie…"></div>
+          <div class="field"><label for="problem">Votre problème</label><textarea id="problem" name="problem" placeholder="Décrivez le problème que vous voulez résoudre — le contexte, ce qui bloque, ce que vous avez déjà essayé." required></textarea></div>
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <button type="submit" class="btn">Envoyer mon problème <span class="arr">→</span></button>
           <p class="consent">En envoyant, vous acceptez d'être recontacté par Solva au sujet de votre demande. Vos informations ne servent qu'à analyser et résoudre votre problème.</p>
         </form>
       </div>
 
       <div class="confirm" id="confirmView">
-        <span class="node" aria-hidden="true"></span>
-        <h2>Problème reçu.</h2>
-        <p>On l'analyse dès maintenant. Vous recevrez un email à <b id="confirmEmail">votre adresse</b> vous indiquant si — et comment — nous pouvons le résoudre. Généralement sous 48 h.</p>
-        <div class="ref" id="confirmRef">Référence : SOL-0000</div>
-        <span class="again" id="againBtn">Envoyer un autre problème</span>
+        <div class="sequence" aria-hidden="true">
+          <span class="seq-dot" style="--i:0"></span><span class="seq-dot" style="--i:1"></span><span class="seq-dot" style="--i:2"></span><span class="seq-dot" style="--i:3"></span><span class="seq-dot" style="--i:4"></span><span class="seq-dot" style="--i:5"></span><span class="seq-dot" style="--i:6"></span><span class="seq-dot" style="--i:7"></span>
+          <span class="seq-node"><span class="ring"></span><span class="ring"></span><span class="ring"></span></span>
+        </div>
+        <div class="confirm-copy">
+          <h2>Problème reçu.</h2>
+          <p>On l'analyse dès maintenant. Vous recevrez un email à <b id="confirmEmail">votre adresse</b> vous indiquant si — et comment — nous pouvons le résoudre. Généralement sous 24 h.</p>
+          <div class="ref" id="confirmRef">Référence : SOL-0000</div><br>
+          <span class="again" id="againBtn">Envoyer un autre problème</span>
+        </div>
       </div>
     </div>
   </div>
@@ -281,52 +352,113 @@
       <div class="foot-brand">solva<span>.</span></div>
       <div class="foot-tag">Dites le problème. On livre la solution.</div>
     </div>
-    <div class="foot-meta">
-      © 2026 Solva · Studio de solutions augmenté par l'IA<br>
-      <a href="mailto:hello@solva.fr">hello@solva.fr</a>
-    </div>
+    <div class="foot-meta">© 2026 Solva · Studio de solutions augmenté par l'IA<br><a href="mailto:contact@solva.business">contact@solva.business</a></div>
   </div>
 </footer>
 
 <script>
-  /* === Brancher les soumissions ===
-     Collez ici l'URL de votre webhook (Make, n8n, Formspree, Google Apps Script…)
-     pour recevoir réellement les problèmes. Laissé vide = la page simule l'envoi. */
   const FORM_ENDPOINT = "https://solvaanthony.app.n8n.cloud/webhook/solva-probleme";
+
+  document.body.classList.add('ready');
+
+  /* ===== Fond animé : champ de points + ondes de signal ===== */
+  (function(){
+    const canvas = document.getElementById('bgcanvas');
+    if(!canvas) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(reduce) return;
+    const ctx = canvas.getContext('2d');
+    let W, H, dpr, grid = 22, sparkles = [], ripples = [], running = true, lastSpark = 0, lastRip = 0;
+
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      W = window.innerWidth; H = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize, {passive:true});
+
+    function gridPoint(){
+      const cols = Math.max(1, Math.floor(W / grid));
+      const rows = Math.max(1, Math.floor(H / grid));
+      return { x: (Math.floor(Math.random()*cols)+0.5)*grid, y: (Math.floor(Math.random()*rows)+0.5)*grid };
+    }
+
+    function loop(t){
+      if(!running) return;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,W,H);
+
+      if(t-lastSpark > 110 && sparkles.length < 28){ const p = gridPoint(); sparkles.push({x:p.x,y:p.y,born:t,life:1100+Math.random()*900,green:Math.random()<0.16}); lastSpark = t; }
+      sparkles = sparkles.filter(s => t-s.born < s.life);
+      for(const s of sparkles){
+        const pr = (t-s.born)/s.life;
+        const a = Math.sin(Math.PI*pr) * 0.7;
+        ctx.beginPath(); ctx.arc(s.x,s.y,1.7,0,6.2832);
+        ctx.fillStyle = (s.green ? 'rgba(52,209,127,' : 'rgba(245,243,236,') + a.toFixed(3) + ')';
+        ctx.fill();
+      }
+
+      if(t-lastRip > 1700 && ripples.length < 4){ const p = gridPoint(); ripples.push({x:p.x,y:p.y,born:t,dur:2600}); lastRip = t; }
+      ripples = ripples.filter(r => t-r.born < r.dur);
+      for(const r of ripples){
+        const pr = (t-r.born)/r.dur;
+        const rad = 6 + pr*72;
+        const a = (1-pr) * 0.45;
+        ctx.beginPath(); ctx.arc(r.x,r.y,rad,0,6.2832);
+        ctx.strokeStyle = 'rgba(52,209,127,' + a.toFixed(3) + ')';
+        ctx.lineWidth = 1; ctx.stroke();
+        if(pr < 0.25){ ctx.beginPath(); ctx.arc(r.x,r.y,2.4,0,6.2832); ctx.fillStyle = 'rgba(52,209,127,' + (1-pr*4).toFixed(3) + ')'; ctx.fill(); }
+      }
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+    document.addEventListener('visibilitychange', ()=>{
+      running = !document.hidden;
+      if(running) requestAnimationFrame(loop);
+    });
+  })();
 
   const nav = document.getElementById('nav');
   const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
-  window.addEventListener('scroll', onScroll, {passive:true});
-  onScroll();
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
 
-  const steps = document.querySelectorAll('.step');
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e, i) => {
-        if (e.isIntersecting) {
-          setTimeout(() => e.target.classList.add('in'), i * 110);
-          io.unobserve(e.target);
-        }
-      });
-    }, {threshold:0.2});
-    steps.forEach(s => io.observe(s));
-  } else {
-    steps.forEach(s => s.classList.add('in'));
+  const hv = document.querySelector('.hero-visual');
+  if (hv && window.matchMedia('(hover:hover)').matches){
+    hv.addEventListener('mousemove', e => {
+      const r = hv.getBoundingClientRect();
+      hv.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+      hv.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+    });
   }
 
+  const reveals = document.querySelectorAll('[data-reveal]');
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach((e,i)=>{ if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('in'), (i%4)*90); io.unobserve(e.target);} });
+    }, {threshold:0.2});
+    reveals.forEach(s=>io.observe(s));
+  } else { reveals.forEach(s=>s.classList.add('in')); }
+
+
   const form = document.getElementById('problemForm');
-  const formView = document.getElementById('formView');
+  const formInner = document.getElementById('formInner');
   const confirmView = document.getElementById('confirmView');
 
   function makeRef(){
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let r = '';
-    for (let i=0;i<4;i++) r += chars[Math.floor(Math.random()*chars.length)];
-    return 'SOL-' + r;
+    const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r='';
+    for(let i=0;i<4;i++) r+=chars[Math.floor(Math.random()*chars.length)];
+    return 'SOL-'+r;
   }
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (e)=>{
     e.preventDefault();
+    if (form.website && form.website.value) { return; }
+
     const data = {
       company: form.company.value.trim(),
       email: form.email.value.trim(),
@@ -336,29 +468,30 @@
       sentAt: new Date().toISOString()
     };
 
-    if (FORM_ENDPOINT) {
-      try {
-        await fetch(FORM_ENDPOINT, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify(data)
-        });
-      } catch (err) {
-        console.error('Envoi vers le webhook échoué :', err);
-      }
-    }
+    formInner.classList.add('leaving');
+    setTimeout(()=>{
+      formInner.style.display='none';
+      document.getElementById('confirmEmail').textContent = data.email || 'votre adresse';
+      document.getElementById('confirmRef').textContent = 'Référence : ' + data.ref;
+      confirmView.style.display='flex';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        confirmView.classList.add('run');
+        confirmView.scrollIntoView({behavior:'smooth', block:'center'});
+      }));
+    }, 360);
 
-    document.getElementById('confirmEmail').textContent = data.email || 'votre adresse';
-    document.getElementById('confirmRef').textContent = 'Référence : ' + data.ref;
-    formView.style.display = 'none';
-    confirmView.classList.add('show');
-    confirmView.scrollIntoView({behavior:'smooth', block:'center'});
+    if (FORM_ENDPOINT){
+      try{ await fetch(FORM_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}); }
+      catch(err){ console.error('Envoi webhook échoué :', err); }
+    }
   });
 
-  document.getElementById('againBtn').addEventListener('click', () => {
+  document.getElementById('againBtn').addEventListener('click', ()=>{
     form.reset();
-    confirmView.classList.remove('show');
-    formView.style.display = 'block';
+    confirmView.classList.remove('run');
+    confirmView.style.display='none';
+    formInner.classList.remove('leaving');
+    formInner.style.display='block';
     document.getElementById('exposer').scrollIntoView({behavior:'smooth', block:'start'});
   });
 </script>
