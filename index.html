@@ -162,6 +162,22 @@
   .form-inner .btn{margin-top:6px;justify-content:center;width:100%}
   .consent{font-size:.78rem;color:var(--muted-2);margin-top:2px;line-height:1.5}
 
+  /* TIP / INSPIRATION */
+  .tip{margin-top:11px;display:flex;flex-direction:column;gap:11px}
+  .tip-hint{font-size:.84rem;color:var(--muted);line-height:1.5;margin:0;padding-left:13px;border-left:2px solid rgba(52,209,127,0.45)}
+  .tip-bulb{display:inline-flex;align-items:center;gap:9px;align-self:flex-start;font-family:var(--fb);font-size:.85rem;font-weight:500;color:var(--bone);background:rgba(52,209,127,0.06);border:1px solid var(--line-2);border-radius:9px;padding:9px 13px;cursor:pointer;text-align:left;line-height:1.35;transition:border-color .2s,background .2s}
+  .tip-bulb:hover{border-color:var(--green);background:rgba(52,209,127,0.11)}
+  .tip-bulb .bulb{color:var(--green);display:inline-flex;flex:0 0 auto;filter:drop-shadow(0 0 5px rgba(52,209,127,.5))}
+  .tip-bulb .tip-chev{color:var(--muted);margin-left:1px;transition:transform .25s}
+  .tip-bulb[aria-expanded="true"] .tip-chev{transform:rotate(180deg)}
+  .tip-panel{border:1px solid var(--line-2);border-radius:11px;background:var(--ink-2);padding:15px 16px;animation:tipIn .26s var(--ease)}
+  @keyframes tipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .tip-lead{font-size:.82rem;color:var(--muted);margin:0 0 11px}
+  .tip-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--fb);font-size:.82rem;color:var(--bone);background:var(--ink);border:1px solid var(--line-2);border-radius:999px;padding:8px 14px;cursor:pointer;line-height:1.3;transition:border-color .18s,background .18s,transform .18s}
+  .chip:hover{border-color:var(--green);background:rgba(52,209,127,0.09);transform:translateY(-1px)}
+  .chip:active{transform:translateY(0)}
+
   /* CONFIRMATION */
   .confirm{display:none;flex-direction:column;align-items:center;text-align:center;padding:26px 6px 10px;position:relative}
   .confirm.show{display:flex}
@@ -327,7 +343,26 @@
             <div class="field"><label for="email">Email professionnel</label><input id="email" name="email" type="email" placeholder="vous@entreprise.com" required></div>
           </div>
           <div class="field"><label for="sector">Secteur <span class="opt">(facultatif)</span></label><input id="sector" name="sector" type="text" placeholder="Ex. logistique, e-commerce, industrie…"></div>
-          <div class="field"><label for="problem">Votre problème</label><textarea id="problem" name="problem" placeholder="Décrivez le problème que vous voulez résoudre — le contexte, ce qui bloque, ce que vous avez déjà essayé." required></textarea></div>
+          <div class="field"><label for="problem">Votre problème</label><textarea id="problem" name="problem" placeholder="Décrivez le problème que vous voulez résoudre — le contexte, ce qui bloque, ce que vous avez déjà essayé." required></textarea>
+            <div class="tip">
+              <p class="tip-hint">Astuce : pensez à une tâche chronophage que vous répétez chaque jour. L'automatiser, c'est autant de temps gagné — chaque jour.</p>
+              <button type="button" class="tip-bulb" id="tipBulb" aria-expanded="false" aria-controls="tipPanel">
+                <span class="bulb" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.4 1 2.5h6c0-1.1.5-2 1-2.5A6 6 0 0 0 12 3z"/></svg></span>
+                <span>Pas d'idée précise ? Voir des exemples de problèmes</span>
+                <span class="tip-chev" aria-hidden="true">▾</span>
+              </button>
+              <div class="tip-panel" id="tipPanel" hidden>
+                <p class="tip-lead">Cliquez sur une piste pour démarrer votre description, puis adaptez-la à votre cas :</p>
+                <div class="tip-chips">
+                  <button type="button" class="chip" data-ex="Je refais chaque devis et chaque facture à la main : c'est long, répétitif et il y a des erreurs. J'aimerais les générer automatiquement à partir des infos client.">Refaire les devis et factures à la main</button>
+                  <button type="button" class="chip" data-ex="Je relance mes factures impayées à la main, j'en oublie, et ça pèse sur ma trésorerie. J'aimerais que les relances de paiement partent automatiquement au bon moment.">Relancer les paiements en retard</button>
+                  <button type="button" class="chip" data-ex="Trop de clients oublient leur rendez-vous ou annulent au dernier moment, et ça me coûte des créneaux. J'aimerais envoyer des rappels de rendez-vous automatiques.">Réduire les rendez-vous non honorés</button>
+                  <button type="button" class="chip" data-ex="Chaque jour, je recopie les mêmes informations d'un outil à un autre (commandes, tableur, comptabilité). J'aimerais que ces données se synchronisent toutes seules.">Ressaisir les mêmes infos dans plusieurs outils</button>
+                  <button type="button" class="chip" data-ex="Je réponds en permanence aux mêmes questions de clients, par email, téléphone ou messages, et ça me prend un temps fou. J'aimerais automatiser ces réponses.">Répondre aux mêmes questions clients</button>
+                  <button type="button" class="chip" data-ex="Je n'ai pas le temps de demander des avis Google à mes clients ni de répondre à chacun, alors que c'est ce qui me rend visible localement. J'aimerais automatiser la récolte et les réponses aux avis.">Récolter et répondre aux avis Google</button>
+                </div>
+              </div>
+            </div></div>
           <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <button type="submit" class="btn">Envoyer mon problème <span class="arr">→</span></button>
           <p class="consent">En envoyant, vous acceptez d'être recontacté par Solva au sujet de votre demande. Vos informations ne servent qu'à analyser et résoudre votre problème.</p>
@@ -498,6 +533,30 @@
     formInner.style.display='block';
     document.getElementById('exposer').scrollIntoView({behavior:'smooth', block:'start'});
   });
+
+  /* ===== Astuce : ampoule + exemples de problèmes ===== */
+  (function(){
+    const bulb = document.getElementById('tipBulb');
+    const panel = document.getElementById('tipPanel');
+    const problem = document.getElementById('problem');
+    if (bulb && panel){
+      bulb.addEventListener('click', ()=>{
+        const opening = panel.hasAttribute('hidden');
+        if (opening){ panel.removeAttribute('hidden'); bulb.setAttribute('aria-expanded','true'); }
+        else { panel.setAttribute('hidden',''); bulb.setAttribute('aria-expanded','false'); }
+      });
+    }
+    document.querySelectorAll('.tip-chips .chip').forEach(c=>{
+      c.addEventListener('click', ()=>{
+        if(!problem) return;
+        problem.value = c.getAttribute('data-ex');
+        problem.focus();
+        try{ problem.setSelectionRange(problem.value.length, problem.value.length); }catch(e){}
+        problem.dispatchEvent(new Event('input', {bubbles:true}));
+        problem.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    });
+  })();
 </script>
 </body>
 </html>
